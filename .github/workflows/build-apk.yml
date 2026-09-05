@@ -1,6 +1,9 @@
 name: Build Bab Ul Ilm Raza E Mustafa APK
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -8,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -30,16 +33,16 @@ jobs:
         with:
           gradle-version: "8.7"
 
-      - name: Find Android project ZIP
+      - name: Find ZIP
         run: |
           ZIP_FILE=$(find . -type f -name "*.zip" | head -n 1)
 
           if [ -z "$ZIP_FILE" ]; then
-            echo "ERROR: Android project ZIP not found!"
+            echo "ERROR: ZIP not found"
             exit 1
           fi
 
-          echo "Found ZIP: $ZIP_FILE"
+          echo "ZIP: $ZIP_FILE"
 
           mkdir -p extracted
           unzip -q "$ZIP_FILE" -d extracted
@@ -47,13 +50,11 @@ jobs:
           PROJECT_DIR=$(find extracted -type f -name "settings.gradle" -printf '%h\n' | head -n 1)
 
           if [ -z "$PROJECT_DIR" ]; then
-            echo "ERROR: Android project not found!"
-            find extracted -maxdepth 4 -type f | head -100
+            echo "ERROR: Android project not found"
             exit 1
           fi
 
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          echo "Android project found at: $PROJECT_DIR"
 
       - name: Build APK
         run: |
